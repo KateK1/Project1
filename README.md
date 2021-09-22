@@ -1,6 +1,5 @@
-# Project1
+# Visualization construction company
 
-Визуализация для сайта компании с основными показателями объемов работ по монтажу резиновых покрытий
-
+Visualization for construction company site (now not in use) shows main parameters of production rubber floors
 
 Визуализация: 
