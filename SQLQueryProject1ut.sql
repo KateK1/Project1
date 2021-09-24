@@ -96,15 +96,29 @@ where [Дата Дог#] is not NULL
 group by [Дата Дог#], [ЭПДМ зеленый], [ЭПДМ терракот], [ЭПДМ красный], [ЭПДМ желтый], [ЭПДМ синий], [ЭПДМ белый], [ЭПДМ оранжевый], [ЭПДМ серый], [ЭПДМ бежевый], [ЭПДМ голубой]
 
 
+--Общая информация
+select
+'Субъектов' as Название,
+count (distinct Субъект) as Знач
+from PortfolioProject1..Adresses
+union
+select
+'Населеных пунктов' as Название,
+count (distinct [Населенный пункт]) as Знач
+from PortfolioProject1..Adresses
+union
+select
+'Общая площадь' as Название,
+sum (round ([Общ S м2],0)) as Знач
+from PortfolioProject1..Types_Colors
+union
+select 
+'ЦветаБРП' as Название,
+'7' as Знач
+from PortfolioProject1..Types_Colors
+union
+select
+'Цвета ЭПДМ' as Название,
+'16' as Знач
+from PortfolioProject1..Types_Colors
 
---Количество и процент вернувшихся клиентов
-Create view РаспределениеКлиентов as
-with ТаблицаПоКлиентам (Клиенты, ОригинальныеКлиенты, вернувшиесяКлиенты)
-as
-(
-select count (ИНН) as Клиенты, cast(count (distinct ИНН) as float) as ОригинальныеКлиенты, cast((count (ИНН) - (count (distinct ИНН)))as float) as вернувшиесяКлиенты 
-from PortfolioProject1..Main_info
-where [Дата Дог#] is not NULL
-)
-select *, round(((вернувшиесяКлиенты/Клиенты)*100), 0) as ПроцентВернулись, round(((ОригинальныеКлиенты/Клиенты)*100), 0) ПроцентОриг
-from ТаблицаПоКлиентам
