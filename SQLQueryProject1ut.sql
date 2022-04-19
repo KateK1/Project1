@@ -1,4 +1,4 @@
-﻿---Количество договров и площади. Распределение по субъектам
+﻿--Total contracts, square by regions
 Create view РаспределениеПо_Субъектам as
 select TOP 10 Субъект, count(Договор) AS КоличествоДоговоров, SUM ([Общ S м2]) AS СуммарнаяПлощадь, ROUND(AVG ([Общ S м2]),0) AS СредняяПлощадь
 from PortfolioProject1..Adresses
@@ -6,7 +6,7 @@ where Субъект is not NULL
 group by Субъект
 order by СуммарнаяПлощадь DESC
 
----Количество договров и площади. Распределение по населенным пунктам
+-- Total contracts, square by cities
 Create view РаспределениеНаселенныеПункты as
 select TOP 10 [Населенный пункт], count(Договор) AS КоличествоДоговоров, SUM ([Общ S м2]) AS СуммарнаяПлощадь, ROUND(AVG ([Общ S м2]),0) AS СредняяПлощадь
 from PortfolioProject1..Adresses
@@ -14,7 +14,7 @@ where [Населенный пункт] is not NULL
 group by [Населенный пункт]
 order by КоличествоДоговоров DESC
 
---Количество оригинальных субъектов и населенных пунктов
+--Distinct regions and cities
 Create view СубъектыНаселенныеПункты as
 select  count(distinct Субъект) as Субъекты, count(distinct [Населенный пункт]) as НаселенныеПункты
 from PortfolioProject1..Adresses
@@ -22,7 +22,7 @@ where [Населенный пункт] is not NULL
 and Субъект is not NULL
 
 
---Суммы площади по видам+++
+--Total square by flooring type
 Create table pvt
 (Год nvarchar(255),
 Трава numeric,
@@ -53,7 +53,7 @@ UNPIVOT
 GO
 
 
---Распределение цветов покрытия БРП
+--Seamless rubber floors color distribution
 select'Черный' AS Цвет, SUM([БРП черный]) AS Площадь
 from PortfolioProject1..Types_Colors
 union 
@@ -78,7 +78,7 @@ where [Дата Дог#] is not NULL
 order by Площадь desc
 
 
----ЭПДМ наростающий итог+++
+--EPDM flooring cumulative total 
 Create view ЭПДМ_НаростающийИтог as
 select convert(date,[Дата Дог#]) as Дата,
 SUM([ЭПДМ зеленый]) OVER (order by [Дата Дог#]) AS Зеленый,
@@ -96,7 +96,7 @@ where [Дата Дог#] is not NULL
 group by [Дата Дог#], [ЭПДМ зеленый], [ЭПДМ терракот], [ЭПДМ красный], [ЭПДМ желтый], [ЭПДМ синий], [ЭПДМ белый], [ЭПДМ оранжевый], [ЭПДМ серый], [ЭПДМ бежевый], [ЭПДМ голубой]
 
 
---Общая информация
+--Main info
 select
 'Субъектов' as Название,
 count (distinct Субъект) as Знач
