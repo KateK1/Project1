@@ -1,39 +1,65 @@
-﻿--Total contracts, square by regions
-Create view РаспределениеПо_Субъектам as
-select TOP 10 Субъект, count(Договор) AS КоличествоДоговоров, SUM ([Общ S м2]) AS СуммарнаяПлощадь, ROUND(AVG ([Общ S м2]),0) AS СредняяПлощадь
+﻿
+ -- Adresses
+ -- Adress - Adress - full adress 
+ -- ИНН - CN - customer number
+ -- Договор - Contract - contract number
+ -- Общ S м2 - Total_area total area per contract in sq. m.
+ -- Субъект - Region - region name
+ -- Населенный пункт - Town - town name
+ 
+ -- Types_Colors
+ -- Договор - Contract - contract number
+ -- Дата Дог Contract_date - date of contract signing
+ -- Общ S м2 Total_area total area per contract in sq. m.
+ -- Total_area_grass, area_grass20, area_grass40, area_grass60 - 
+ -- rubber10, rubber12, rubber15, rubber20, rubber25, rubber30, rubber40, rubber55
+ -- spray8+2, spray10+2, spray10+3
+ -- rubber_black, rubber_терракот, rubber_green, rubber_blue, rubber_gray, rubber_orange, rubber_yellow
+ -- Плитка
+ -- Рулонное
+ -- EPDM10+5, EPDM15+5, EPDM20+5, EPDM25+5, EPDM30+10, EPDM40+5, EPDM40+10
+ -- EPDM_зеленый, EPDM_терракот, EPDM_Красный, EPDM_Желтый, EPDM_синий, EPDM_белый, EPDM_оранжевый, EPDM_фиолетовый, EPDM_розовый, EPDM_серый, EPDM_коричневый, EPDM_бежевый, EPDM_голубой, EPDM_бирюзовый, EPDM_изумруд, EPDM_Лосось
+ -- Основание
+ 
+ 
+ 
+ 
+ --Total contracts, square by regions
+Create view Contracts_by_region as
+select TOP 10 Region, count(Contract) AS contracts, SUM (Total_area) AS sum_area, ROUND(AVG (Total_area),0) AS avg_area
 from PortfolioProject1..Adresses
-where Субъект is not NULL
-group by Субъект
-order by СуммарнаяПлощадь DESC
+where Region is not NULL
+group by Region
+order by sum_area DESC
 
 -- Total contracts, square by cities
-Create view РаспределениеНаселенныеПункты as
-select TOP 10 [Населенный пункт], count(Договор) AS КоличествоДоговоров, SUM ([Общ S м2]) AS СуммарнаяПлощадь, ROUND(AVG ([Общ S м2]),0) AS СредняяПлощадь
+Create view Towns as
+select TOP 10 Town, count(Contract) AS Contract, SUM (Total_area) AS Total_area, ROUND(AVG (Total_area),0) AS Avarege_area
 from PortfolioProject1..Adresses
-where [Населенный пункт] is not NULL
-group by [Населенный пункт]
-order by КоличествоДоговоров DESC
+where Town is not NULL
+group by Town
+order by Contract DESC
 
 --Distinct regions and cities
-Create view СубъектыНаселенныеПункты as
-select  count(distinct Субъект) as Субъекты, count(distinct [Населенный пункт]) as НаселенныеПункты
+Create view Regions_Towns as
+select  count(distinct Region) as Region, count(distinct Town) as Town
 from PortfolioProject1..Adresses
-where [Населенный пункт] is not NULL
-and Субъект is not NULL
+where Town is not NULL
+and Region is not NULL
 
 
 --Total square by flooring type
 Create table pvt
-(Год nvarchar(255),
-Трава numeric,
-БРП numeric,
-Напыление numeric,
-ЭПДМ numeric,
-Рулонное numeric)
+(Год Year nvarchar(255),
+Трава Grass numeric,
+БРП Rubber numeric,
+Напыление Spray_coating numeric,
+ЭПДМ EPDM numeric,
+Рулонное Roll_coating numeric)
 
 Insert into pvt
-select DATEPART(year, [Дата Дог#]) as Год,
-SUM ([ОбщS Трава]) AS Трава,
+select DATEPART(year, [Дата Дог#]) as Year,
+SUM (Total_area_grass) AS Трава,
 SUM (ISNULL(БРП10,0)) + SUM (ISNULL(БРП15,0))+ SUM(ISNULL(БРП20,0))+ SUM(ISNULL(БРП25,0))+SUM(ISNULL(БРП30,0))+SUM(ISNULL(БРП40,0))+ SUM(ISNULL([БРП 55],0)) AS аБРП,
 SUM(ISNULL([БРП напыл 8+2],0)) + SUM(ISNULL([БРП напыл 10+2],0)) + SUM(ISNULL([БРП напыл 10+3],0)) AS СуммаНапыление,
 SUM(ISNULL([ЭПДМ10+5],0)) + SUM(ISNULL([ЭПДМ 15+5],0)) + SUM(ISNULL([ЭПДМ 20+5],0)) + SUM(ISNULL([ЭПДМ 25+5],0)) + SUM(ISNULL([ЭПДМ 30+10],0)) + SUM(ISNULL([ЭПДМ 40+10],0)) + SUM(ISNULL([ЭПДМ 40+5],0)) AS ЭПДМ,
