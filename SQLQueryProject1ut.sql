@@ -1,150 +1,151 @@
 ﻿
- -- Adresses
- -- Adress - Adress - full adress 
- -- ИНН - CN - customer number
- -- Договор - Contract - contract number
- -- Общ S м2 - Total_area total area per contract in sq. m.
- -- Субъект - Region - region name
- -- Населенный пункт - Town - town name
+ -- Addresses table
+ -- Adress - full adress 
+ -- CN - customer number
+ -- Contract - contract number
+ -- Total_area total area per contract in sq. m.
+ -- Region - region name
+ -- Town - town name
  
- -- Types_Colors
- -- Договор - Contract - contract number
- -- Дата Дог Contract_date - date of contract signing
- -- Общ S м2 Total_area total area per contract in sq. m.
- -- Total_area_grass, area_grass20, area_grass40, area_grass60 - 
- -- rubber10, rubber12, rubber15, rubber20, rubber25, rubber30, rubber40, rubber55
- -- spray8+2, spray10+2, spray10+3
- -- rubber_black, rubber_терракот, rubber_green, rubber_blue, rubber_gray, rubber_orange, rubber_yellow
- -- Плитка
- -- Рулонное
- -- EPDM10+5, EPDM15+5, EPDM20+5, EPDM25+5, EPDM30+10, EPDM40+5, EPDM40+10
- -- EPDM_зеленый, EPDM_терракот, EPDM_Красный, EPDM_Желтый, EPDM_синий, EPDM_белый, EPDM_оранжевый, EPDM_фиолетовый, EPDM_розовый, EPDM_серый, EPDM_коричневый, EPDM_бежевый, EPDM_голубой, EPDM_бирюзовый, EPDM_изумруд, EPDM_Лосось
- -- Основание
- 
+ -- Types_Colors table
+ -- Contract - contract number
+ -- Contract_date - date of contract signing
+ -- Total_area - the total area per contract in sq. m.
+ -- Total_area_grass, area_grass20, area_grass40, area_grass60 - the total area of synthetic grass of each type per contract in sq. m.
+ -- rubber10, rubber12, rubber15, rubber20, rubber25, rubber30, rubber40, rubber55 - the total area of rubber coating of each type per contract in sq. m.
+ -- spray8+2, spray10+2, spray10+3 - the total area of a spray coat of each type per contract in sq. m.
+ -- rubber_black, rubber_terracota, rubber_green, rubber_blue, rubber_gray, rubber_orange, rubber_yellow - the total area of rubber coating of each color per contract in sq. m.
+ -- rubber_tile - the total area of rubber tile coating per contract in sq. m.
+ -- roll_coating - the total area of roll_coating per contract in sq. m.
+ -- EPDM10+5, EPDM15+5, EPDM20+5, EPDM25+5, EPDM30+10, EPDM40+5, EPDM40+10 - the total area of EPDM coating of each type per contract in sq. m.
+ -- EPDM_green, EPDM_terracota, EPDM_redй, EPDM_yellow, EPDM_blue, EPDM_white, EPDM_orange, EPDM_grey, EPDM_beige, EPDM_lightblue - the total area of EPDM coating of each color per contract in sq. m.
  
  
  
- --Total contracts, square by regions
+ 
+ -- Total contracts, coating total area per region
 Create view Contracts_by_region as
 select TOP 10 Region, count(Contract) AS contracts, SUM (Total_area) AS sum_area, ROUND(AVG (Total_area),0) AS avg_area
-from PortfolioProject1..Adresses
+from PortfolioProject1..Addresses
 where Region is not NULL
 group by Region
 order by sum_area DESC
 
--- Total contracts, square by cities
+-- Total contracts, coating total area per town
 Create view Towns as
 select TOP 10 Town, count(Contract) AS Contract, SUM (Total_area) AS Total_area, ROUND(AVG (Total_area),0) AS Avarege_area
-from PortfolioProject1..Adresses
+from PortfolioProject1..Addresses
 where Town is not NULL
 group by Town
 order by Contract DESC
 
---Distinct regions and cities
+-- How many distinct regions and towns where the company works
 Create view Regions_Towns as
 select  count(distinct Region) as Region, count(distinct Town) as Town
-from PortfolioProject1..Adresses
+from PortfolioProject1..Addresses
 where Town is not NULL
 and Region is not NULL
 
 
---Total square by flooring type
+-- Total area by flooring type
 Create table pvt
 (Год Year nvarchar(255),
-Трава Grass numeric,
-БРП Rubber numeric,
-Напыление Spray_coating numeric,
-ЭПДМ EPDM numeric,
-Рулонное Roll_coating numeric)
+Трава total_grass_area numeric,
+БРП total_rubber_area numeric,
+Напыление total_spray_area numeric,
+ЭПДМ total_EPDM_area numeric,
+Рулонное total_roll_coating numeric)
 
 Insert into pvt
-select DATEPART(year, [Дата Дог#]) as Year,
-SUM (Total_area_grass) AS Трава,
-SUM (ISNULL(БРП10,0)) + SUM (ISNULL(БРП15,0))+ SUM(ISNULL(БРП20,0))+ SUM(ISNULL(БРП25,0))+SUM(ISNULL(БРП30,0))+SUM(ISNULL(БРП40,0))+ SUM(ISNULL([БРП 55],0)) AS аБРП,
-SUM(ISNULL([БРП напыл 8+2],0)) + SUM(ISNULL([БРП напыл 10+2],0)) + SUM(ISNULL([БРП напыл 10+3],0)) AS СуммаНапыление,
-SUM(ISNULL([ЭПДМ10+5],0)) + SUM(ISNULL([ЭПДМ 15+5],0)) + SUM(ISNULL([ЭПДМ 20+5],0)) + SUM(ISNULL([ЭПДМ 25+5],0)) + SUM(ISNULL([ЭПДМ 30+10],0)) + SUM(ISNULL([ЭПДМ 40+10],0)) + SUM(ISNULL([ЭПДМ 40+5],0)) AS ЭПДМ,
-SUM (Рулонное) AS Рулонное
+select DATEPART(year, [Дата Дог#]) as year,
+SUM (Total_area_grass) AS total_grass_area,
+SUM (ISNULL(rubber10,0)) + SUM (ISNULL(rubber15,0)) + SUM(ISNULL(rubber20,0)) + SUM(ISNULL(rubber25,0)) + SUM(ISNULL(rubber30,0)) + SUM(ISNULL(rubber40,0)) +
+SUM(ISNULL(rubber55,0)) AS total_rubber_area,
+SUM(ISNULL(spray8+2,0)) + SUM(ISNULL(spray10+2,0)) + SUM(ISNULL(spray10+3,0)) AS total_spray_area,
+SUM(ISNULL(EPDM10+5,0)) + SUM(ISNULL(EPDM15+5,0)) + SUM(ISNULL(EPDM20+5,0)) + SUM(ISNULL(EPDM25+5,0)) + SUM(ISNULL(EPDM30+10,0)) +
+SUM(ISNULL(EPDM40+10,0)) + SUM(ISNULL(EPDM40+5,0)) AS total_EPDM_area,
+SUM (roll_coating) AS total_roll_coating
 from PortfolioProject1..Types_Colors
-where [Дата Дог#] is not NULL
-group by DATEPART(year, [Дата Дог#])
-Create view ПлощадиПоВидам as
-SELECT Год, Категория, Количество
+where Contract_date is not NULL
+group by DATEPART(year, Contract_date)
+Create view type_area as
+SELECT year, type, total_area
 FROM   
-   (SELECT Год, Трава, БРП, Напыление, ЭПДМ, Рулонное  
+   (SELECT year, total_grass_area, total_rubber_area, total_spray_area, total_EPDM_area, total_roll_coating 
    FROM pvt) p
 UNPIVOT  
-	(Количество FOR Категория IN   
-		(Трава, БРП, Напыление, ЭПДМ, Рулонное)  
+	(total_area FOR type IN   
+		(total_grass_area, total_rubber_area, total_spray_area, total_EPDM_area, total_roll_coating)  
 )AS unpvt;
 GO
 
 
---Seamless rubber floors color distribution
-select'Черный' AS Цвет, SUM([БРП черный]) AS Площадь
+-- Seamless rubber floors color distribution
+select 'Black' AS Color, SUM(rubber_black) AS total_area
 from PortfolioProject1..Types_Colors
 union 
-select 'Терракот' AS Цвет, SUM([БРП терракот]) AS Площадь
+select 'Terracota' AS Color, SUM(rubber_terracota) AS total_area
 from PortfolioProject1..Types_Colors
 union 
-select 'Зеленый' AS Цвет, SUM([БРП зеленый]) AS Площадь
+select 'Green' AS Color, SUM(rubber_green]) AS total_area
 from PortfolioProject1..Types_Colors
 union 
-select 'Синий' AS Цвет, SUM([БРП синий]) AS Площадь
+select 'Blue AS Color, SUM(rubber_blue]) AS total_area
 from PortfolioProject1..Types_Colors
 union 
-select 'Серый' AS Цвет, SUM([БРП серый]) AS Площадь
+select 'Gray' AS Color, SUM(rubber_gray]) AS total_area
 from PortfolioProject1..Types_Colors
 union 
-select 'Оранжевый' AS Цвет, SUM([БРП оранжевый]) AS Площадь
+select 'Orange' AS Color, SUM(rubber_orange]) AS total_area
 from PortfolioProject1..Types_Colors
 union 
-select 'Желтый' AS Цвет, SUM([БРП желтый]) AS Площадь
+select 'Yellow' AS Color, SUM(rubber_yellow]) AS total_area
 from PortfolioProject1..Types_Colors
-where [Дата Дог#] is not NULL
-order by Площадь desc
+where Contract_date is not NULL
+order by total_area desc
 
 
---EPDM flooring cumulative total 
-Create view ЭПДМ_НаростающийИтог as
-select convert(date,[Дата Дог#]) as Дата,
-SUM([ЭПДМ зеленый]) OVER (order by [Дата Дог#]) AS Зеленый,
-SUM([ЭПДМ терракот]) OVER (order by [Дата Дог#]) AS Терракот, 
-SUM([ЭПДМ красный]) OVER (order by [Дата Дог#]) AS Красный, 
-SUM([ЭПДМ желтый]) OVER (order by [Дата Дог#]) AS Желтый,
-SUM([ЭПДМ синий]) OVER (order by [Дата Дог#]) AS Синий,
-SUM([ЭПДМ белый]) OVER (order by [Дата Дог#]) AS Белый,
-SUM([ЭПДМ оранжевый]) OVER (order by [Дата Дог#]) AS Оранжевый,
-SUM([ЭПДМ серый]) OVER (order by [Дата Дог#]) AS Серый,
-SUM([ЭПДМ бежевый]) OVER (order by [Дата Дог#]) AS Бежевый,
-SUM([ЭПДМ голубой]) OVER (order by [Дата Дог#]) AS Голубой
+-- EPDM flooring cumulative total 
+Create view EPDM_cumulative_total as
+select convert(date, Contract_date) as Date,
+SUM(EPDM_green) OVER (order by Contract_date) AS Green,
+SUM(EPDM_terracota) OVER (order by Contract_date) AS Terracota, 
+SUM(EPDM_red) OVER (order by Contract_date) AS Red, 
+SUM(EPDM_yellow) OVER (order by Contract_date AS Yellow,
+SUM(EPDM_blue) OVER (order by Contract_date) AS Blue,
+SUM(EPDM_white) OVER (order by Contract_date) AS White,
+SUM(EPDM_orange) OVER (order by Contract_date) AS Orange,
+SUM(EPDM_gray) OVER (order by Contract_date) AS Gray,
+SUM(EPDM_beige) OVER (order by Contract_date) AS Beige,
+SUM(EPDM_lightblue) OVER (order by Contract_date) AS Light_blue
 from PortfolioProject1..Types_Colors
-where [Дата Дог#] is not NULL
-group by [Дата Дог#], [ЭПДМ зеленый], [ЭПДМ терракот], [ЭПДМ красный], [ЭПДМ желтый], [ЭПДМ синий], [ЭПДМ белый], [ЭПДМ оранжевый], [ЭПДМ серый], [ЭПДМ бежевый], [ЭПДМ голубой]
+where Contract_date is not NULL
+group by Contract_date, EPDM_green, EPDM_terracota, EPDM_red, EPDM_yellow, [EPDM_blue, EPDM_white, [EPDM_orange,
+[EPDM_gray, EPDM_beige, EPDM_lightblue
 
 
---Main info
+-- Main info
 select
-'Субъектов' as Название,
-count (distinct Субъект) as Знач
-from PortfolioProject1..Adresses
+'Regions' as Name,
+count (distinct Region) as Value
+from PortfolioProject1..Addresses
 union
 select
-'Населеных пунктов' as Название,
-count (distinct [Населенный пункт]) as Знач
-from PortfolioProject1..Adresses
+'Towns' as Name,
+count (distinct Towns) as Value
+from PortfolioProject1..Addresses
 union
 select
-'Общая площадь' as Название,
-sum (round ([Общ S м2],0)) as Знач
+'Tota_area' as Name,
+sum (round (Total_are, 0)) as Value
 from PortfolioProject1..Types_Colors
 union
 select 
-'ЦветаБРП' as Название,
-'7' as Знач
+'rubber colors' as Name,
+'7' as Value
 from PortfolioProject1..Types_Colors
 union
 select
-'Цвета ЭПДМ' as Название,
-'16' as Знач
+'EPDM colors' as Name,
+'16' as Value
 from PortfolioProject1..Types_Colors
-
